@@ -1,33 +1,39 @@
-import { Events, GatewayIntentBits } from "discord.js";
 import { config } from "dotenv";
 import { Bot } from "./bases/Bot";
+
 import { onReady } from "./events/onReady";
+import { onInteractionCreate } from "./events/onInteractionCreate";
+
 import { PingCommand } from "./commands/ping";
 
 const client = new Bot({ intents: 53608447 });
 
 config();
 
-function processExitHandler() {
+function init_logger() { 
+    client.getLogger().flushEvery(7000);
+}
+
+function init_process_exit_handler() {
 
     const logger = client.getLogger();
 
-    process.on('SIGINT', async () => {
+    process.on("SIGINT", async () => {
         await logger.flush();
         process.exit();
     });
 
-    process.on('SIGTERM', async () => {
+    process.on("SIGTERM", async () => {
         await logger.flush();
         process.exit();
     });
 
-    process.on('uncaughtException', async (err) => {
+    process.on("uncaughtException", async (err) => {
         await logger.flush();
         process.exit(1);
     });
 
-    process.on('unhandledRejection', async (reason) => {
+    process.on("unhandledRejection", async (reason) => {
         await logger.flush();
         process.exit(1);
     });
@@ -35,16 +41,7 @@ function processExitHandler() {
 
 async function init_events() {
     client.getEventManager().register(new onReady());
-    client.getEventManager().register({
-        name: Events.InteractionCreate,
-        once: false,
-        execute: async (bot, interaction) => {
-            if (interaction.isChatInputCommand()) {
-                await bot.getCommandManager().executeCommand(interaction); 
-                return;
-            }
-        }
-    });
+    client.getEventManager().register(new onInteractionCreate());
 }
 
 async function init_commands() {
@@ -52,14 +49,16 @@ async function init_commands() {
     client.getCommandManager().uploadCommands({ token: process.env.TOKEN!, app_id: process.env.APP_ID!, api_version: "9" })
 }
 
+async function init_bot() {
+    await client.login(process.env.TOKEN!);
+}
+
 async function main() {
-    processExitHandler();
+    init_logger();
+    init_process_exit_handler();
     await init_commands();
     await init_events();
-
-    client.getLogger().flushEvery(7000);
-
-    await client.login(process.env.TOKEN!);
+    await init_bot();
 }
 
 main();
