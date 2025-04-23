@@ -1,6 +1,7 @@
 import { Client, ClientEvents } from 'discord.js';
 import { IEventManager } from '../interfaces/IEventManager';
 import { IEvent } from '../interfaces/IEvent';
+import { IBot } from '../interfaces/IBot';
 
 type Handler<K extends keyof ClientEvents> = {
     event: IEvent<K>;
@@ -9,10 +10,12 @@ type Handler<K extends keyof ClientEvents> = {
 
 export class EventManager implements IEventManager {
     private handlers = new Map<keyof ClientEvents, Handler<any>[]>();
-    constructor(private client: Client) {}
+    constructor(private client: IBot) {}
     
     register<K extends keyof ClientEvents>(event: IEvent<K>): void {
-        const handler = (...args: ClientEvents[K]) => { event.execute(...args); };
+        const handler = (...args: ClientEvents[K]) => {
+            event.execute(this.client, ...args);
+        };
     
         const existing = this.handlers.get(event.name) || [];
         this.handlers.set(event.name, [...existing, { event, handler }]);

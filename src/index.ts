@@ -38,9 +38,9 @@ async function init_events() {
     client.getEventManager().register({
         name: Events.InteractionCreate,
         once: false,
-        execute: async (interaction) => {
+        execute: async (bot, interaction) => {
             if (interaction.isChatInputCommand()) {
-                await client.getCommandManager().executeCommand(interaction);
+                await bot.getCommandManager().executeCommand(interaction); 
                 return;
             }
         }

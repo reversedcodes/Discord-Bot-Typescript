@@ -1,9 +1,8 @@
-import { ClientEvents } from "discord.js";
+import { ClientEvents } from 'discord.js';
+import { IBot } from './IBot';
 
-export interface IEvent<K extends keyof ClientEvents = keyof ClientEvents> {
+export interface IEvent<K extends keyof ClientEvents> {
     name: K;
-    execute: (...args: ClientEvents[K]) => void;
-    once?: boolean;
-    priority?: number;
+    once: boolean;
+    execute(bot: IBot, ...args: ClientEvents[K]): void;
 }
-

@@ -1,9 +1,11 @@
+import { BotLogger } from '../bases/BotLogger';
 import { IEventManager } from '../interfaces/IEventManager';
 import { ICommandManager } from './ICommandManager';
-import { ILogger } from './ILogger';
+import { Client } from 'discord.js';
 
-export interface IBot {
+
+export interface IBot extends Client{
     getEventManager(): IEventManager;
     getCommandManager(): ICommandManager;
-    getLogger(): ILogger;
+    getLogger(): BotLogger;
 }
